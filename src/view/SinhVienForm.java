@@ -14,7 +14,7 @@ import java.util.ArrayList;
 public class SinhVienForm extends JFrame {
     private JTable tableSinhVien;
     private DefaultTableModel tableModel;
-    private JTextField txtID, txtName, txtAge, txtAddress;
+    private JTextField txtID, txtName, txtAge, txtAddress, txtIDClass;
     private JComboBox<String> cbGender;
     private JButton btnThem, btnSua, btnXoa, btnTimKiem, btnRefresh;
     private SinhvienDAO sinhvienDAO;
@@ -34,7 +34,7 @@ public class SinhVienForm extends JFrame {
         setLayout(new BorderLayout());
 
         // Panel chứa thông tin sinh viên
-        JPanel panelInfo = new JPanel(new GridLayout(5, 2, 10, 10));
+        JPanel panelInfo = new JPanel(new GridLayout(6, 2, 10, 10));
         panelInfo.setBorder(BorderFactory.createTitledBorder("Thông tin sinh viên"));
 
         panelInfo.add(new JLabel("ID:"));
@@ -56,6 +56,10 @@ public class SinhVienForm extends JFrame {
         panelInfo.add(new JLabel("Địa chỉ:"));
         txtAddress = new JTextField();
         panelInfo.add(txtAddress);
+
+        panelInfo.add(new JLabel("ID Lớp:"));
+        txtIDClass = new JTextField();
+        panelInfo.add(txtIDClass);
 
         // Panel chứa các nút chức năng
         JPanel panelButtons = new JPanel(new FlowLayout());
@@ -79,6 +83,7 @@ public class SinhVienForm extends JFrame {
         tableModel.addColumn("Tuổi");
         tableModel.addColumn("Giới tính");
         tableModel.addColumn("Địa chỉ");
+        tableModel.addColumn("ID Lớp");
 
         tableSinhVien = new JTable(tableModel);
         JScrollPane scrollPane = new JScrollPane(tableSinhVien);
@@ -107,6 +112,7 @@ public class SinhVienForm extends JFrame {
                     txtAge.setText(tableModel.getValueAt(selectedRow, 2).toString());
                     cbGender.setSelectedItem(tableModel.getValueAt(selectedRow, 3).toString());
                     txtAddress.setText(tableModel.getValueAt(selectedRow, 4).toString());
+                    txtIDClass.setText(tableModel.getValueAt(selectedRow, 5).toString());
 
                     // Disable ID field khi đang sửa
                     txtID.setEditable(false);
@@ -124,8 +130,9 @@ public class SinhVienForm extends JFrame {
                     int age = Integer.parseInt(txtAge.getText());
                     String gender = cbGender.getSelectedItem().toString();
                     String address = txtAddress.getText();
+                    int idClass = Integer.parseInt(txtIDClass.getText());
 
-                    Sinhvien sv = new Sinhvien(id, name, age, gender, address);
+                    Sinhvien sv = new Sinhvien(id, name, age, gender, address, idClass);
                     int result = sinhvienDAO.themSinhVien(sv);
 
                     if (result > 0) {
@@ -136,7 +143,7 @@ public class SinhVienForm extends JFrame {
                         JOptionPane.showMessageDialog(null, "Thêm sinh viên thất bại!");
                     }
                 } catch (NumberFormatException ex) {
-                    JOptionPane.showMessageDialog(null, "ID và Tuổi phải là số!");
+                    JOptionPane.showMessageDialog(null, "ID, Tuổi và ID Lớp phải là số!");
                 }
             }
         });
@@ -151,8 +158,9 @@ public class SinhVienForm extends JFrame {
                     int age = Integer.parseInt(txtAge.getText());
                     String gender = cbGender.getSelectedItem().toString();
                     String address = txtAddress.getText();
+                    int idClass = Integer.parseInt(txtIDClass.getText());
 
-                    Sinhvien sv = new Sinhvien(id, name, age, gender, address);
+                    Sinhvien sv = new Sinhvien(id, name, age, gender, address, idClass);
                     int result = sinhvienDAO.updateSinhVien(sv);
 
                     if (result > 0) {
@@ -163,7 +171,7 @@ public class SinhVienForm extends JFrame {
                         JOptionPane.showMessageDialog(null, "Cập nhật sinh viên thất bại!");
                     }
                 } catch (NumberFormatException ex) {
-                    JOptionPane.showMessageDialog(null, "ID và Tuổi phải là số!");
+                    JOptionPane.showMessageDialog(null, "ID, Tuổi và ID Lớp phải là số!");
                 }
             }
         });
@@ -212,7 +220,7 @@ public class SinhVienForm extends JFrame {
 
                         if (sv != null) {
                             tableModel.setRowCount(0);
-                            Object[] row = {sv.getID(), sv.getName(), sv.getAge(), sv.getGender(), sv.getAddress()};
+                            Object[] row = {sv.getID(), sv.getName(), sv.getAge(), sv.getGender(), sv.getAddress(), sv.getIDClass()};
                             tableModel.addRow(row);
 
                             // Hiển thị thông tin tìm được trên form
@@ -221,6 +229,7 @@ public class SinhVienForm extends JFrame {
                             txtAge.setText(String.valueOf(sv.getAge()));
                             cbGender.setSelectedItem(sv.getGender());
                             txtAddress.setText(sv.getAddress());
+                            txtIDClass.setText(String.valueOf(sv.getIDClass()));
                             txtID.setEditable(false);
                         } else {
                             JOptionPane.showMessageDialog(null, "Không tìm thấy sinh viên với ID: " + id);
@@ -248,7 +257,7 @@ public class SinhVienForm extends JFrame {
         ArrayList<Sinhvien> danhSachSV = sinhvienDAO.layDanhSachSinhVien();
 
         for (Sinhvien sv : danhSachSV) {
-            Object[] row = {sv.getID(), sv.getName(), sv.getAge(), sv.getGender(), sv.getAddress()};
+            Object[] row = {sv.getID(), sv.getName(), sv.getAge(), sv.getGender(), sv.getAddress(), sv.getIDClass()};
             tableModel.addRow(row);
         }
     }
@@ -260,6 +269,7 @@ public class SinhVienForm extends JFrame {
         txtAge.setText("");
         cbGender.setSelectedIndex(0);
         txtAddress.setText("");
+        txtIDClass.setText("");
         txtID.setEditable(true);
     }
 

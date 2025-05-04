@@ -11,25 +11,27 @@ import java.util.List;
 public class ClassDAO {
     //Thêm Lớp mới
     public boolean themLop(ClassDTO classDTO) {
-        String sql = "insert into Class (NameClass,IDTeacher) values (?,?)";
-        try(Connection conn = DatabaseConnection.getConnection();
-            PreparedStatement pst = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)){
+        String sql = "INSERT INTO Class (IDClass, NameClass, IDTeacher) VALUES ((SELECT ISNULL(MAX(IDClass), 0) + 1 FROM Class), ?, ?)";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
+
             pst.setString(1, classDTO.getNameClass());
             pst.setInt(2, classDTO.getIDTeacher());
 
             int rows = pst.executeUpdate();
-            if(rows > 0) {
-                try (ResultSet rs = pst.getGeneratedKeys()) {
-                    if(rs.next()) {
+            if (rows > 0) {
+                // Get the generated ID if needed
+                try (Statement stmt = conn.createStatement();
+                     ResultSet rs = stmt.executeQuery("SELECT MAX(IDClass) FROM Class")) {
+                    if (rs.next()) {
                         classDTO.setIDClass(rs.getInt(1));
                     }
                 }
                 return true;
             }
             return false;
-
-        }catch (SQLException e){
-            System.err.println("Lỗi khi thêm lớp: " + e.getMessage());
+        } catch (SQLException e) {
+            System.err.println("Error adding class: " + e.getMessage());
             return false;
         }
     }
@@ -99,7 +101,10 @@ public class ClassDAO {
 
     // Lấy danh sách tất cả các lớp học
     public List<ClassDTO> getAllClass() {
-        String sql = "SELECT * FROM Class";
+        String sql =
+                "SELECT c.IDClass, c.NameClass, c.IDTeacher, t.Name AS TeacherCNName " +
+                        "FROM Class c " +
+                        "LEFT JOIN TeacherCN t ON c.IDTeacher = t.IDTeacher";
         List<ClassDTO> classList = new ArrayList<>();
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pst = conn.prepareStatement(sql);
@@ -110,10 +115,9 @@ public class ClassDAO {
                 classDTO.setIDClass(rs.getInt("IDClass"));
                 classDTO.setNameClass(rs.getString("NameClass"));
                 classDTO.setIDTeacher(rs.getInt("IDTeacher"));
-
+                classDTO.setTeacherCNName(rs.getString("TeacherCNName"));  // use new setter
                 classList.add(classDTO);
             }
-
         } catch (SQLException e) {
             System.err.println("Lỗi khi lấy danh sách lớp học: " + e.getMessage());
         }

@@ -1,7 +1,9 @@
 package controller;
 
 import dao.ClassDAO;
+import dao.TeacherCNDAO;
 import model.ClassDTO;
+import model.TeacherCN;
 
 import java.util.List;
 
